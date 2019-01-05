@@ -1,0 +1,24 @@
+[kdcdefaults]
+    kdc_ports = 88
+
+[realms]
+    {{ krb_realm }} = {
+        database_name = {{ krb_server_dir_data }}/principal
+        admin_keytab = {{ krb_server_dir_conf }}/kadm5.keytab
+        acl_file = {{ krb_server_dir_conf }}/kadm5.acl
+        key_stash_file = {{ krb_server_dir_conf }}/stash
+        kadmind_port = 749
+        max_life = 10h 0m 0s
+        max_renewable_life = 7d 0h 0m 0s
+        supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal camellia256-cts:normal camellia128-cts:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
+    }
+
+[dbmodules]
+    {{ krb_realm }} = {
+        database_name = {{ krb_server_dir_data }}/principal
+    }
+
+[logging]
+    default = FILE:{{ krb_server_dir_log }}/krb5libs.log
+    kdc = FILE:{{ krb_server_dir_log }}/krb5kdc.log
+    admin_server = FILE:{{ krb_server_dir_log }}/kadmind.log

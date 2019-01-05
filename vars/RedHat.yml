@@ -1,0 +1,14 @@
+---
+krb_server_services:
+  - krb5kdc
+  - kadmin
+
+krb_server_packages:
+  - krb5-server
+  - krb5-workstation
+  - krb5-libs
+  - haveged
+
+krb_dir_conf: /var/kerberos/krb5kdc
+krb_dir_data: /var/kerberos/krb5kdc
+krb_dir_log: /var/log/krb

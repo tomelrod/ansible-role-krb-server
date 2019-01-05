@@ -1,0 +1,66 @@
+---
+- name: Include OS-specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install Kerberos server packages
+  package:
+    name: "{{ item }}"
+  with_items: "{{ krb_server_packages }}"
+
+- name: Ensure config, log, and database locations exist
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ krb_server_dir_conf }}"
+    - "{{ krb_server_dir_data }}"
+    - "{{ krb_server_dir_log }}"
+
+- name: Install Kerberos server config file
+  template:
+    src: kdc.conf.j2
+    dest: "{{ krb_server_dir_conf }}/kdc.conf"
+
+- name: Install Kerberos server acl file
+  template:
+    src: kadm5.acl.j2
+    dest: "{{ krb_server_dir_conf }}/kadm5.acl"
+
+- name: Install Kerberos client config file
+  template:
+    src: krb5.conf.j2
+    dest: /etc/krb5.conf
+
+
+- name: Start haveged to fill the entropy pool
+  service:
+    name: haveged
+    state: started
+
+
+- name: Check if the Kerberos server has been initialized
+  stat:
+    path: "{{ krb_server_dir_conf }}/is_initialized"
+  register: krb_init
+
+- name: Create Kerberos database
+  shell: KRB5_KDC_PROFILE={{ krb_server_dir_conf }}/kdc.conf /usr/sbin/kdb5_util create -P {{ krb_masterkey }} -r {{ krb_realm }} -d {{ krb_server_dir_data }}/principal -s
+  when: krb_init.stat.exists == False
+
+- name: Create Kerberos admin user
+  command: kadmin.local -q "addprinc -pw {{ krb_admin_pass }} {{ krb_admin_user }}/admin"
+  when: krb_init.stat.exists == False
+
+- name: Create a file to let us know Kerberos is initialized
+  file:
+    path: "{{ krb_server_dir_conf }}/is_initialized"
+    state: touch
+  when: krb_init.stat.exists == False
+
+
+- name: Start and enable Kerberos server
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ krb_server_services }}"

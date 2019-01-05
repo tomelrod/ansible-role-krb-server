@@ -1,0 +1,11 @@
+---
+krb_admin_user: 'root'
+krb_admin_pass: 'Pa55w0rd'
+krb_masterkey: 'Ma5t3rK3y'
+krb_realm: 'EXAMPLE.COM'
+krb_server: 'krbserver.example.com'
+krb_domain: 'example.com'
+
+krb_server_dir_conf: "{{ krb_dir_conf }}"
+krb_server_dir_data: "{{ krb_dir_data }}"
+krb_server_dir_log: "{{ krb_dir_log }}"
